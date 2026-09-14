@@ -1,0 +1,19 @@
+# Telegram
+telethon
+
+# LangChain + Gemini
+langchain
+langchain-core
+langchain-google-genai
+google-generativeai
+
+# Multi-keyword search (fuzzy matching)
+rapidfuzz
+
+# Environment
+python-dotenv
+
+# Dashboard
+streamlit
+plotly
+pandas

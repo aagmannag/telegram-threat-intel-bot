@@ -1,0 +1,32 @@
+# ── Secrets & Credentials ──────────────────────────────
+.env
+
+# ── Telegram Session ───────────────────────────────────
+*.session
+*.session-journal
+
+# ── Scraped Data ───────────────────────────────────────
+data/output.json
+
+# ── Python ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual Environment ────────────────────────────────
+venv/
+env/
+.venv/
+ENV/
+
+# ── OS Files ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp

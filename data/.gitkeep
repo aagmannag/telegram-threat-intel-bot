@@ -1,0 +1,2 @@
+# This file keeps the data/ directory tracked in git.
+# output.json is listed in .gitignore and will NOT be committed.

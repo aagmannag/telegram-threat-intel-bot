@@ -1,0 +1,60 @@
+Proof of Concept (POC)
+Telegram Cyber Threat Intelligence Bot
+
+What This System Does
+This is an automated cyber threat intelligence collection system. It monitors Telegram channels used by hackers, threat actors, and cybercrime groups, automatically detects dangerous messages using keyword matching and AI analysis, and stores structured threat intelligence data for analysis.
+In simple terms — it watches hacker channels 24/7 so you don't have to.
+
+The Problem It Solves
+Cybersecurity analysts today manually browse hundreds of Telegram channels to find threats like data breaches, ransomware announcements, credential leaks, and zero-day exploits. This is slow, exhausting, and impossible to scale. A human can monitor maybe 5-10 channels. This bot monitors unlimited channels simultaneously, never sleeps, and processes every message in seconds.
+
+How It Works — Step by Step
+Step 1 — Connect to Telegram
+The bot logs into Telegram as a real user account using your API credentials. It can see every channel you have joined, exactly like a human user would.
+Step 2 — Scrape Historical Messages
+On startup, it fetches the last 500 messages from every joined channel simultaneously. Three channels are scraped in parallel to stay fast without triggering Telegram's flood ban.
+Step 3 — Keyword Pre-Filter (Free, No AI)
+Every message is checked locally using 5 methods before any AI call is made. This saves API costs by dropping irrelevant messages immediately.
+Step 4 — AI Analysis via Gemini
+Messages that pass the filter go through 4 Gemini API calls — translation, threat classification, entity extraction, and summarization.
+Step 5 — Risk Scoring
+A scoring algorithm combines all signals — keyword matches, AI confidence, extracted entities — and assigns CRITICAL / HIGH / MEDIUM / LOW.
+Step 6 — Store and Display
+Results are saved to a JSON file and displayed on a Streamlit dashboard with charts, filters, and a live threat feed.
+Step 7 — Live Monitoring
+After the historical scrape, the bot switches to real-time mode and processes every new message posted to any monitored channel instantly.
+
+Technologies Used
+Telethon — Python library that connects to Telegram using the MTProto protocol. Acts as a real Telegram user, not a bot. This is what gives access to channel messages.
+LangChain — AI pipeline framework. Used to structure the 4 Gemini API calls as a clean multi-step chain using ChatPromptTemplate and RunnableLambda.
+Google Gemini 2.0 Flash — The LLM doing the actual intelligence work. Handles translation, threat classification, entity extraction, and summarization.
+RapidFuzz — Fuzzy string matching library. Used in the keyword pre-filter to catch typos and leet speak like d4ta l3ak matching data leak.
+Python Regex (re) — Used in the pre-filter to catch patterns like IP addresses, CVE IDs, record counts (50k users), and paste site links without needing an AI call.
+Streamlit — Python web framework for the dashboard. Turns the JSON data into an interactive UI with charts and filters in pure Python.
+Plotly — Charting library used inside Streamlit for the risk level donut chart, threat type bar charts, and activity timeline.
+Pandas — Data manipulation library. Loads the JSON output file and handles filtering, sorting, and CSV export in the dashboard.
+python-dotenv — Loads API keys and configuration from the .env file so credentials are never hardcoded.
+
+The 5-Method Keyword Search
+This is the most technically interesting part. Instead of a simple word search, 5 methods run on every message:
+Exact match — literal substring check. Fast, free, catches direct keyword mentions.
+Proximity match — checks if two related words appear within 6 words of each other. Catches "database of users was dumped" even though the phrase "database dump" doesn't appear literally.
+Synonym match — checks 8 synonym groups. "compromised", "pwned", "breached" all map to "hacked". Catches obfuscated language.
+Fuzzy match — uses RapidFuzz to score similarity. "d4ta l3ak" scores 83% similar to "data leak", above the 82% threshold, so it matches.
+Regex match — catches structural patterns like CVE IDs, IP addresses, record counts (50,000 users), onion links, and paste sites.
+Only if all 5 methods find nothing is the message dropped. Otherwise it goes to Gemini.
+
+What the AI Extracts From Each Message
+For every confirmed threat message, Gemini extracts:
+
+Language — detects if Russian, Arabic, Chinese etc. and translates to English
+Threat type — DataBreach, Ransomware, DDoS, Defacement, Malware, Exploit, CredentialLeak, Hacktivism, ThreatActor
+Confidence score — 0.0 to 1.0 how certain the classification is
+Organizations targeted — company or government names mentioned
+Countries affected — geographic targeting
+IP addresses — infrastructure mentioned in the message
+Attack tools — malware names, exploit kits, tool names
+Data types — passwords, credit cards, SSNs, etc.
+Record count — how many records were stolen
+Threat actor — hacker name or group name
+2-line summary — human readable summary for analysts
